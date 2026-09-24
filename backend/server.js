@@ -11,7 +11,7 @@ const app = express();
 app.use(helmet({ crossOriginResourcePolicy: { policy: "cross-origin" } }));
 
 // Allow the Vite dev server on any localhost port, plus anything in CORS_ORIGIN.
-const LOCAL = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/;
+const LOCAL = "https://aibuilder-1-622q.onrender.com";
 app.use(
   cors({
     origin(origin, cb) {
