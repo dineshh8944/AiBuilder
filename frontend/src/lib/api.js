@@ -18,7 +18,7 @@ export const TOKEN_KEY = "ttp_crm_token";
    That's the entire switch from "UI demo" to "fully wired app".
    ───────────────────────────────────────────────────────────────────────── */
 
-const baseURL = import.meta.env.VITE_API_URL || "http://localhost:8000/api";
+const baseURL = import.meta.env.VITE_API_URL || "https://aibuilder-5bt8.onrender.com";
 
 const api = axios.create({ baseURL });
 
