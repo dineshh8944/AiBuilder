@@ -10,13 +10,19 @@ const app = express();
 
 app.use(helmet({ crossOriginResourcePolicy: { policy: "cross-origin" } }));
 
-// Allow the Vite dev server on any localhost port, plus anything in CORS_ORIGIN.
-const LOCAL = "https://aibuilder-1-622q.onrender.com";
+// Allow local development, the deployed frontend, and any origins configured
+// through CORS_ORIGIN (comma-separated) in Render environment variables.
+const DEPLOYED_FRONTEND = "https://aibuilder-1-622q.onrender.com";
+const LOCAL_ORIGIN = /^https?:\/\/localhost(?::\d+)?$/;
 app.use(
   cors({
     origin(origin, cb) {
-      // Not allowed -> no CORS headers, so the browser blocks the request.
-      cb(null, !origin || LOCAL.test(origin) || config.CORS_ORIGINS.includes(origin));
+      const allowed =
+        !origin ||
+        origin === DEPLOYED_FRONTEND ||
+        LOCAL_ORIGIN.test(origin) ||
+        config.CORS_ORIGINS.includes(origin);
+      cb(null, allowed);
     },
   })
 );
