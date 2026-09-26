@@ -1,24 +1,8 @@
 import axios from "axios";
 
-/* localStorage key for the auth token — used by AuthContext (and by the real
-   API client below, once enabled). */
 export const TOKEN_KEY = "ttp_crm_token";
 
-/* ──────────────────────────────────────────────────────────────────────────
-   🔌 BACKEND INTEGRATION — currently DISABLED for the UI-only boilerplate.
-
-   While building the UI we run entirely on mock data (see lib/mockData.js,
-   served through lib/services.js). When your Express backend is ready:
-
-     1. Uncomment the `import axios` line at the top of this file.
-     2. Uncomment the whole block below.
-     3. In lib/services.js, swap each method from the mock version back to the
-        real `api.<method>(...)` call (both are kept side-by-side there).
-
-   That's the entire switch from "UI demo" to "fully wired app".
-   ────────────────────────────────────────────────────────────────────────── */
-
-/* const baseURL = import.meta.env.VITE_API_URL || "http://localhost:8000/api";
+const baseURL = import.meta.env.VITE_API_URL || "https://aibuilder-5bt8.onrender.com/api";
 
 const api = axios.create({ baseURL });
 
@@ -29,7 +13,7 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Normalise responses & errors so callers get clean data / messages.
+// Normalize responses and errors so callers get clean data/messages.
 api.interceptors.response.use(
   (res) => res.data,
   (error) => {
@@ -47,4 +31,4 @@ api.interceptors.response.use(
   }
 );
 
-export default api; */
+export default api;
