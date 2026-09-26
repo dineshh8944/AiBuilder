@@ -1,34 +1,51 @@
-import axios from "axios";
+import api from "./api";
 
-export const TOKEN_KEY = "ttp_crm_token";
+export const authApi = {
+  login: (data) => api.post("/auth/login", data),
+  register: (data) => api.post("/auth/register", data),
+  me: () => api.get("/auth/me"),
+  updateProfile: (data) => api.put("/auth/profile", data),
+};
 
-const baseURL = import.meta.env.VITE_API_URL || "https://aibuilder-5bt8.onrender.com/api";
+export const leadsApi = {
+  list: (params) => api.get("/leads", { params }),
+  get: (id) => api.get(`/leads/${id}`),
+  create: (data) => api.post("/leads", data),
+  update: (id, data) => api.put(`/leads/${id}`, data),
+  remove: (id) => api.delete(`/leads/${id}`),
+  reorder: (updates) => api.patch("/leads/reorder", { updates }),
+};
 
-const api = axios.create({ baseURL });
+export const contactsApi = {
+  list: (params) => api.get("/contacts", { params }),
+  get: (id) => api.get(`/contacts/${id}`),
+  create: (data) => api.post("/contacts", data),
+  update: (id, data) => api.put(`/contacts/${id}`, data),
+  remove: (id) => api.delete(`/contacts/${id}`),
+};
 
-// Attach the JWT to every request if we have one.
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem(TOKEN_KEY);
-  if (token) config.headers.Authorization = `Bearer ${token}`;
-  return config;
-});
+export const notesApi = {
+  list: (params) => api.get("/notes", { params }),
+  create: (data) => api.post("/notes", data),
+  update: (id, data) => api.put(`/notes/${id}`, data),
+  remove: (id) => api.delete(`/notes/${id}`),
+};
 
-// Normalize responses and errors so callers get clean data/messages.
-api.interceptors.response.use(
-  (res) => res.data,
-  (error) => {
-    const status = error.response?.status;
-    const message =
-      error.response?.data?.message || error.message || "Something went wrong";
+export const tasksApi = {
+  list: (params) => api.get("/tasks", { params }),
+  create: (data) => api.post("/tasks", data),
+  update: (id, data) => api.put(`/tasks/${id}`, data),
+  remove: (id) => api.delete(`/tasks/${id}`),
+};
 
-    // Auto-logout on an expired/invalid token (but not on the login screen).
-    if (status === 401 && !window.location.pathname.startsWith("/login")) {
-      localStorage.removeItem(TOKEN_KEY);
-      window.dispatchEvent(new Event("ttp:unauthorized"));
-    }
+export const aiApi = {
+  status: () => api.get("/ai/status"),
+  leadSummary: (data) => api.post("/ai/lead-summary", data),
+  generateEmail: (data) => api.post("/ai/generate-email", data),
+  salesInsights: (data) => api.post("/ai/sales-insights", data),
+  chat: (data) => api.post("/ai/chat", data),
+};
 
-    return Promise.reject({ status, message });
-  }
-);
-
-export default api;
+export const analyticsApi = {
+  overview: () => api.get("/analytics/overview"),
+};
