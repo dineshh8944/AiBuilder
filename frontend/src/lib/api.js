@@ -1,51 +1,50 @@
-import api from "./api";
+import axios from "axios";
 
-export const authApi = {
-  login: (data) => api.post("/auth/login", data),
-  register: (data) => api.post("/auth/register", data),
-  me: () => api.get("/auth/me"),
-  updateProfile: (data) => api.put("/auth/profile", data),
-};
+/* localStorage key for the auth token — used by AuthContext (and by the real
+   API client below, once enabled). */
+export const TOKEN_KEY = "ttp_crm_token";
 
-export const leadsApi = {
-  list: (params) => api.get("/leads", { params }),
-  get: (id) => api.get(`/leads/${id}`),
-  create: (data) => api.post("/leads", data),
-  update: (id, data) => api.put(`/leads/${id}`, data),
-  remove: (id) => api.delete(`/leads/${id}`),
-  reorder: (updates) => api.patch("/leads/reorder", { updates }),
-};
+/* ─────────────────────────────────────────────────────────────────────────
+   🔌 BACKEND INTEGRATION — currently DISABLED for the UI-only boilerplate.
 
-export const contactsApi = {
-  list: (params) => api.get("/contacts", { params }),
-  get: (id) => api.get(`/contacts/${id}`),
-  create: (data) => api.post("/contacts", data),
-  update: (id, data) => api.put(`/contacts/${id}`, data),
-  remove: (id) => api.delete(`/contacts/${id}`),
-};
+   While building the UI we run entirely on mock data (see lib/mockData.js,
+   served through lib/services.js). When your Express backend is ready:
 
-export const notesApi = {
-  list: (params) => api.get("/notes", { params }),
-  create: (data) => api.post("/notes", data),
-  update: (id, data) => api.put(`/notes/${id}`, data),
-  remove: (id) => api.delete(`/notes/${id}`),
-};
+     1. Uncomment the `import axios` line at the top of this file.
+     2. Uncomment the whole block below.
+     3. In lib/services.js, swap each method from the mock version back to the
+        real `api.<method>(...)` call (both are kept side-by-side there).
 
-export const tasksApi = {
-  list: (params) => api.get("/tasks", { params }),
-  create: (data) => api.post("/tasks", data),
-  update: (id, data) => api.put(`/tasks/${id}`, data),
-  remove: (id) => api.delete(`/tasks/${id}`),
-};
+   That's the entire switch from "UI demo" to "fully wired app".
+   ───────────────────────────────────────────────────────────────────────── */
 
-export const aiApi = {
-  status: () => api.get("/ai/status"),
-  leadSummary: (data) => api.post("/ai/lead-summary", data),
-  generateEmail: (data) => api.post("/ai/generate-email", data),
-  salesInsights: (data) => api.post("/ai/sales-insights", data),
-  chat: (data) => api.post("/ai/chat", data),
-};
+const baseURL = import.meta.env.VITE_API_URL || "http://localhost:8000/api";
 
-export const analyticsApi = {
-  overview: () => api.get("/analytics/overview"),
-};
+const api = axios.create({ baseURL });
+
+// Attach the JWT to every request if we have one.
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem(TOKEN_KEY);
+  if (token) config.headers.Authorization = `Bearer ${token}`;
+  return config;
+});
+
+// Normalise responses & errors so callers get clean data / messages.
+api.interceptors.response.use(
+  (res) => res.data,
+  (error) => {
+    const status = error.response?.status;
+    const message =
+      error.response?.data?.message || error.message || "Something went wrong";
+
+    // Auto-logout on an expired/invalid token (but not on the login screen).
+    if (status === 401 && !window.location.pathname.startsWith("/login")) {
+      localStorage.removeItem(TOKEN_KEY);
+      window.dispatchEvent(new Event("ttp:unauthorized"));
+    }
+
+    return Promise.reject({ status, message });
+  }
+);
+
+export default api;
